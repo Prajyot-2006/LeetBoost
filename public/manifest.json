@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+
+  "name": "LeetBoost",
+
+  "version": "1.0",
+
+  "description": "LeetCode submission analytics companion",
+
+  "permissions": [
+    "storage"
+  ],
+
+  "icons": {
+    "128": "icon128.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://leetcode.com/*"
+      ],
+
+      "js": [
+        "content.js"
+      ]
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/**",
+        "icon128.png"
+      ],
+
+      "matches": [
+        "https://leetcode.com/*"
+      ]
+    }
+  ]
+}
