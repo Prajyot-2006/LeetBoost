@@ -4,78 +4,81 @@ import {getStats} from "../utils/tracker";
 
 function ReportView(){
 
+  const [report,setReport]=useState(null);
 
-const [report,setReport]=useState(null);
 
+  function generateReport(){
 
+    let path=window.location.pathname.split("/");
 
 
-function generateReport(){
+    if(path[1]!=="problems"){
 
+      setReport({
+        type:"empty"
+      });
 
-let path=window.location.pathname.split("/");
+      return;
 
+    }
 
-// not problem page
 
-if(path[1]!=="problems"){
 
-setReport({
-type:"empty"
-});
+    let data=getStats();
 
-return;
 
-}
 
+    if(!data.submitted){
 
+      chrome.storage.local.get(
 
+        {
+          reports:{}
+        },
 
-let data=getStats();
+        (saved)=>{
 
+          let old=saved.reports[path[2]];
 
-if(!data.submitted){
 
+          if(old){
 
-chrome.storage.local.get(
-{
-reports:{}
-},
-(saved)=>{
+            setReport({
+              type:"report",
+              ...old
+            });
 
+          }
 
-let old=
-saved.reports[path[2]];
+          else{
 
+            setReport({
+              type:"nosubmit"
+            });
 
-if(old){
+          }
 
-setReport({
-type:"report",
-...old
-});
+        }
 
-}
+      );
 
-else{
 
-setReport({
-type:"nosubmit"
-});
+      return;
 
-}
+    }
 
 
-}
-);
 
+    setReport({
 
-return;
+      type:"report",
 
+      ...data
 
-}
+    });
 
 
+  }
 
 
 
@@ -83,429 +86,366 @@ return;
 
 
 
+  if(!report){
 
-setReport({
+    return(
 
-type:"report",
+      <div className="space-y-2">
 
-...data
 
-});
+        <h3 className="
+        text-[11px]
+        font-medium
+        text-gray-400
+        uppercase
+        tracking-wider
+        ">
 
+          Submission Analysis
 
-}
+        </h3>
 
 
 
 
+        <button
 
+          onClick={generateReport}
 
+          className="
+          w-full
+          py-2
 
+          rounded-lg
 
-if(!report){
+          text-sm
+          font-semibold
 
-return(
+          text-white
 
-<div className="space-y-2">
+          bg-gradient-to-r
+          from-green-500
+          to-emerald-600
 
+          hover:from-green-400
+          hover:to-emerald-500
 
-<h3 className="
-text-[11px]
-font-medium
-text-gray-400
-uppercase
-tracking-wider
-">
+          transition
 
-Submission Analysis
+          cursor-pointer
 
-</h3>
+          glow-btn
+          "
 
+        >
 
+          Generate Report
 
+        </button>
 
-<button
 
-onClick={generateReport}
+      </div>
 
-className="
-w-full
-py-2
+    );
 
-rounded-lg
+  }
 
-text-sm
-font-semibold
 
-bg-gradient-to-r
-from-green-500
-to-emerald-600
 
-hover:from-green-400
-hover:to-emerald-500
 
-text-white
 
-shadow-[0_0_16px_rgba(16,185,129,.6)]
 
-transition
-cursor-pointer
-"
 
->
 
-Generate Report
 
-</button>
+  if(report.type==="empty"){
 
+    return(
 
-</div>
+      <div className="space-y-3">
 
-)
 
-}
+        <h3 className="
+        text-[11px]
+        font-medium
+        text-gray-400
+        uppercase
+        tracking-wider
+        ">
 
+        Submission Report
 
+        </h3>
 
 
 
+        <div className="
+        relative
+        overflow-hidden
 
+        rounded-xl
 
+        bg-gradient-to-br
+        from-gray-900
+        to-gray-800
 
+        border
+        border-gray-700/60
 
-// HOME PAGE
+        shadow-sm
 
-if(report.type==="empty"){
+        p-4
 
-return(
+        text-sm
+        text-gray-300
 
-<div className="space-y-3">
+        space-y-2
+        ">
 
 
-<h3 className="
-text-[11px]
-font-medium
-text-gray-400
-uppercase
-tracking-wider
-">
+        <p>No active problem found</p>
 
-Submission Report
 
-</h3>
+        <p className="text-gray-400">
 
+        Open a LeetCode problem to view analysis
 
+        </p>
 
-<div className="
-relative
 
-overflow-hidden
+        </div>
 
-rounded-xl
 
-bg-gradient-to-br
-from-gray-900
-to-gray-800
 
-border
-border-gray-700/60
+        <button
 
-shadow-sm
+        onClick={()=>setReport(null)}
 
-p-4
-text-sm
-text-gray-300
-space-y-2
-">
+        className="w-full py-2 text-sm"
 
+        >
 
-<p>
-No active problem found
-</p>
+        ← Back
 
+        </button>
 
-<p className="text-gray-400">
-Open a LeetCode problem to view analysis
-</p>
 
+      </div>
 
-</div>
+    );
 
+  }
 
 
 
 
-<button
 
-onClick={()=>setReport(null)}
 
-className="
-w-full
-py-2
-text-sm
-"
 
->
 
-← Back
 
-</button>
+  if(report.type==="nosubmit"){
 
+    return(
 
-</div>
+      <div className="space-y-3">
 
-)
 
-}
+        <h3 className="
+        text-[11px]
+        font-medium
+        text-gray-400
+        uppercase
+        tracking-wider
+        ">
 
+        Submission Report
 
+        </h3>
 
 
 
 
+        <div className="
+        relative
+        overflow-hidden
 
+        rounded-xl
 
+        bg-gradient-to-br
+        from-gray-900
+        to-gray-800
 
-// PROBLEM PAGE BUT NO SUBMIT
+        border
+        border-gray-700/60
 
+        shadow-sm
 
-if(report.type==="nosubmit"){
+        p-4
 
-return(
+        text-sm
+        text-gray-300
 
-<div className="space-y-3">
+        space-y-2
+        ">
 
 
-<h3 className="
-text-[11px]
-font-medium
-text-gray-400
-uppercase
-tracking-wider
-">
+        <p>No submissions found</p>
 
-Submission Report
 
-</h3>
+        <p className="text-gray-400">
 
+        Submit a solution to generate analysis
 
+        </p>
 
-<div className="
-relative
 
-overflow-hidden
+        </div>
 
-rounded-xl
 
-bg-gradient-to-br
-from-gray-900
-to-gray-800
 
-border
-border-gray-700/60
 
-shadow-sm
+        <button
 
-p-4
-text-sm
-text-gray-300
-space-y-2
-">
+        onClick={()=>setReport(null)}
 
+        className="w-full py-2 text-sm"
 
-<p>
-No submissions found
-</p>
+        >
 
+        ← Back
 
+        </button>
 
-<p className="text-gray-400">
 
-Submit a solution to generate analysis
+      </div>
 
-</p>
+    );
 
+  }
 
-</div>
 
 
 
 
 
-<button
 
-onClick={()=>setReport(null)}
 
-className="
-w-full
-py-2
-text-sm
-"
 
->
 
-← Back
+  return(
 
-</button>
+    <div className="space-y-3">
 
 
-</div>
+      <h3 className="
+      text-[11px]
+      font-medium
+      text-gray-400
+      uppercase
+      tracking-wider
+      ">
 
-)
+      Submission Report
 
-}
+      </h3>
 
 
 
 
+      <div className="
+      relative
+      overflow-hidden
 
+      rounded-xl
 
+      bg-gradient-to-br
+      from-gray-900
+      to-gray-800
 
+      border
+      border-gray-700/60
 
+      shadow-sm
 
-// ACTUAL REPORT
+      p-4
 
+      space-y-3
 
-return(
+      text-sm
+      text-gray-200
+      ">
 
-<div className="space-y-3">
 
+        <p>
 
-<h3 className="
-text-[11px]
-font-medium
-text-gray-400
-uppercase
-tracking-wider
-">
+        🔥 Attempts : {report.attempts}
 
-Submission Report
+        </p>
 
-</h3>
 
 
+        <p>
 
+        {
+          report.status==="passed"
+          ?
+          "🟢 Mission Passed"
+          :
+          "🔴 Mission Failed"
+        }
 
+        </p>
 
-<div className="
-relative
 
-overflow-hidden
 
-rounded-xl
 
-bg-gradient-to-br
-from-gray-900
-to-gray-800
+        <div className="
+        border-t
+        border-gray-700
 
-border
-border-gray-700/60
+        pt-3
 
-shadow-sm
+        space-y-3
+        ">
 
-p-4
-space-y-3
-text-sm
-text-gray-200
-">
 
+        <p>⏱ Time : {report.time}s</p>
 
+        <p>📋 Paste Events : {report.pasteEvents}</p>
 
-<p>
+        <p>👀 Tab Switches : {report.tabSwitches}</p>
 
-🔥 Attempts : {report.attempts}
+        <p>{report.verdict}</p>
 
-</p>
 
+        </div>
 
 
-<p>
+      </div>
 
-{
-report.status==="passed"
-?
-"🟢 Mission Passed"
-:
-"🔴 Mission Failed"
-}
 
-</p>
 
 
 
+      <button
 
-<div className="
-border-t
-border-gray-700
-pt-3
-space-y-3
-">
+      onClick={()=>setReport(null)}
 
+      className="w-full py-2 text-sm"
 
-<p>
+      >
 
-⏱ Time : {report.time}s
+      ← Back
 
-</p>
+      </button>
 
 
 
-<p>
+    </div>
 
-📋 Paste Events : {report.pasteEvents}
+  );
 
-</p>
-
-
-
-<p>
-
-👀 Tab Switches : {report.tabSwitches}
-
-</p>
-
-
-
-<p>
-
-{report.verdict}
-
-</p>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<button
-
-onClick={()=>setReport(null)}
-
-className="
-w-full
-py-2
-text-sm
-"
-
->
-
-← Back
-
-</button>
-
-
-
-</div>
-
-
-)
 
 }
 

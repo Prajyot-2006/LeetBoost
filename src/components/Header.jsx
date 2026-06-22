@@ -1,79 +1,233 @@
+import {useEffect,useState} from "react";
+import {Settings, X} from "lucide-react";
+import {getLeetCodeUser} from "../utils/user";
+
+
 function Header({onClose,onSettings,activeTab}){
 
+
+const [username,setUsername]=useState("leetcode");
+
+
+useEffect(()=>{
+
+
+let user=getLeetCodeUser();
+
+
+setUsername(user);
+
+
+},[]);
+
+
+
+
+
 return(
-  <div
-    className="
-      px-4 py-3
-      flex justify-between items-center
-      shrink-0
-      border-b border-gray-700/60
-    "
-  >
 
-    <div className="flex items-center gap-3">
+<div
+className="
+px-4 py-3
 
-      <div
-        className="
-          w-9 h-9
-          rounded-full
-          overflow-hidden
-          ring-2 ring-green-500/40
-          shadow-[0_0_12px_rgba(34,197,94,0.6)]
-          flex items-center justify-center
-          bg-gray-800
-        "
-      >
-        ⚡
-      </div>
+flex justify-between items-center
 
-      <div className="leading-tight flex flex-col">
-        <h2 className="font-xl mb-0 text-lg text-gray-100">LeetBoost</h2>
-        <p className="text-xs text-green-400 font-mono">@LeetBoost</p>
-      </div>
+shrink-0
 
-    </div>
+border-b border-gray-700/60
+"
+>
 
-    <div className="flex items-center gap-1">
 
-      <button
-        onClick={onSettings}
-        title="Settings"
-        className={`
-          w-9 h-9
-          flex items-center justify-center
-          rounded-lg transition cursor-pointer
-          ${activeTab === "settings"
-            ? "bg-green-500 text-white shadow-[0_0_12px_rgba(34,197,94,0.8),0_0_24px_rgba(34,197,94,0.5),0_0_48px_rgba(34,197,94,0.2)]"
-            : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white hover:shadow-[0_0_10px_rgba(34,197,94,0.4),0_0_20px_rgba(34,197,94,0.2)]"
-          }
-        `}
-      >
-        ⚙
-      </button>
 
-      <button
-        onClick={onClose}
-        title="Close"
-        className="
-          w-9 h-9
-          flex items-center justify-center
-          rounded-lg
-          bg-gray-800 text-gray-400
-          border border-transparent
-          hover:bg-gray-900 hover:text-purple-300
-          hover:border-purple-500/40
-          hover:shadow-[0_0_10px_rgba(139,92,246,0.6),0_0_22px_rgba(139,92,246,0.3)]
-          transition cursor-pointer
-        "
-      >
-        ✕
-      </button>
+<div className="flex items-center gap-3">
 
-    </div>
 
-  </div>
-)
+
+<div
+className="
+w-9 h-9
+
+rounded-full
+
+overflow-hidden
+
+ring-2 ring-green-500/40
+
+shadow-[0_0_12px_rgba(34,197,94,0.6)]
+
+flex items-center justify-center
+
+bg-gray-800
+"
+>
+
+<img
+  src={chrome.runtime.getURL("icon128.png")}
+  className="
+    w-[120%]
+    h-[120%]
+    object-cover
+    scale-125
+  "
+/>
+
+</div>
+
+
+
+
+<div className="flex flex-col gap-1">
+
+
+<h2 className="font-xl mb-0 text-lg text-gray-100">
+
+LeetBoost
+
+</h2>
+
+
+
+<p className="text-xs text-green-400 font-mono">
+
+@{username}
+
+</p>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div className="flex items-center gap-2">
+
+
+
+<button
+
+onClick={onSettings}
+
+title="Settings"
+
+style={
+activeTab==="settings"
+?
+{
+animation:"led-pulse 2.5s ease-in-out infinite"
+}
+:
+{}
+}
+
+
+className={`
+
+w-9 h-9
+
+flex items-center justify-center
+
+rounded-xl
+
+transition
+
+cursor-pointer
+
+border
+
+
+${
+
+activeTab==="settings"
+
+?
+
+"bg-green-500 text-white border-white shadow-[0_0_10px_rgba(34,197,94,0.7),0_0_20px_rgba(34,197,94,0.4)]"
+
+:
+
+"bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600 hover:text-white"
 
 }
+
+`}
+
+>
+
+
+<Settings size={17} strokeWidth={2}/>
+
+
+</button>
+
+
+
+
+
+
+
+
+
+<button
+
+onClick={onClose}
+
+title="Close"
+
+className="
+w-9 h-9
+
+flex items-center justify-center
+
+rounded-xl
+
+bg-gray-700
+
+text-gray-400
+
+border border-white/20
+
+hover:bg-gray-600
+
+hover:text-white
+
+hover:border-white/40
+
+transition
+
+cursor-pointer
+"
+
+>
+
+
+<X size={15} strokeWidth={2.5}/>
+
+
+</button>
+
+
+
+
+</div>
+
+
+
+</div>
+
+
+)
+
+
+}
+
 
 export default Header;

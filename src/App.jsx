@@ -56,17 +56,18 @@ fixed bottom-6 right-6
 
 z-[999999]
 
-w-[35rem]
+w-[26rem]
 
 max-h-[80vh]
 
-rounded-[22px]
+rounded-2xl
 
 
 bg-gradient-to-br
 
-from-[#111827]
-to-[#162033]
+from-gray-900/90
+
+to-gray-800/90
 
 
 backdrop-blur-xl
@@ -77,7 +78,7 @@ border
 border-gray-700/60
 
 
-shadow-[0_20px_60px_rgba(0,0,0,.6)]
+shadow-[0_20px_60px_rgba(0,0,0,0.6)]
 
 
 flex
@@ -94,6 +95,7 @@ font-sans
 
 
 
+
 <Header
 
 onClose={()=>setOpen(false)}
@@ -101,6 +103,7 @@ onClose={()=>setOpen(false)}
 activeTab={activeTab}
 
 onSettings={()=>{
+
 
 setActiveTab(
 
@@ -115,6 +118,7 @@ activeTab==="settings"
 "settings"
 
 )
+
 
 }}
 
@@ -131,11 +135,18 @@ activeTab==="settings"
 <div
 
 className="
-px-4 py-4
+px-4
+py-4
 
 flex-1
 
 overflow-y-auto
+
+scrollbar-thin
+
+scrollbar-thumb-gray-700/60
+
+scrollbar-track-transparent
 "
 
 >
@@ -167,8 +178,6 @@ activeTab==="report"
 
 
 
-
-
 <div
 
 className="
@@ -176,9 +185,9 @@ px-3 py-2
 
 text-center
 
-text-[10px]
+text-xs
 
-text-gray-500
+text-gray-400
 
 border-t
 

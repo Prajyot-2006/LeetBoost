@@ -21,16 +21,23 @@ useEffect(()=>{
 
 
 chrome.storage.local.get(
+
 {
+
 celebration:true,
+
 sound:true,
+
 theme:"gta"
+
 },
+
 (data)=>{
 
 setSettings(data);
 
 }
+
 );
 
 
@@ -43,22 +50,21 @@ setSettings(data);
 function update(key,value){
 
 
-let updated={
+setSettings({
 
 ...settings,
 
 [key]:value
 
-};
-
-
-setSettings(updated);
+});
 
 
 saveSetting(key,value);
 
 
 }
+
+
 
 
 
@@ -72,20 +78,17 @@ return(
 
 <div className="text-center">
 
-<h3
-className="
+<h3 className="
 text-[11px]
 font-bold
 tracking-widest
 uppercase
 text-gray-400
-"
->
+">
 
 Settings
 
 </h3>
-
 
 </div>
 
@@ -108,12 +111,15 @@ desc="Show GTA-style banner on submission"
 
 enabled={settings.celebration}
 
-onToggle={()=>update(
+onToggle={()=>
+update(
 "celebration",
 !settings.celebration
-)}
+)
+}
 
 />
+
 
 </SettingRow>
 
@@ -129,21 +135,20 @@ desc="Play Wasted / Mission Passed"
 
 >
 
-
 <Toggle
 
 enabled={settings.sound}
 
-onToggle={()=>update(
+onToggle={()=>
+update(
 "sound",
 !settings.sound
-)}
+)
+}
 
 />
 
-
 </SettingRow>
-
 
 
 </Section>
@@ -172,10 +177,10 @@ e.target.value
 )
 }
 
-
 className="
 w-full
 rounded-lg
+
 bg-gray-900
 
 border
@@ -214,17 +219,14 @@ Minecraft
 
 
 
-
-<p className="text-[11px] text-gray-500">
+<p className="text-xs text-gray-400 mt-2">
 
 Controls banner visuals and sound style
 
 </p>
 
 
-
 </div>
-
 
 
 </Section>
@@ -237,23 +239,20 @@ Controls banner visuals and sound style
 
 
 
-<div
-className="
+<div className="
 rounded-lg
 
 border
-border-gray-700
+border-green-900/40
 
-bg-gray-900/60
+bg-green-950/20
 
 px-3
 py-2
 
-text-[10px]
-
-text-gray-400
-"
->
+text-xs
+text-gray-300
+">
 
 Settings are saved automatically to your browser.
 
@@ -283,12 +282,11 @@ function Section({title,children}){
 
 return(
 
-<div
-className="
+<div className="
 rounded-xl
 
 border
-border-gray-700
+border-gray-700/60
 
 bg-gradient-to-br
 from-gray-900
@@ -297,12 +295,10 @@ to-gray-800
 p-4
 
 space-y-4
-"
->
+">
 
 
-<div
-className="
+<div className="
 text-xs
 
 font-semibold
@@ -312,8 +308,7 @@ text-gray-300
 uppercase
 
 tracking-wide
-"
->
+">
 
 {title}
 
@@ -323,13 +318,12 @@ tracking-wide
 {children}
 
 
-
 </div>
-
 
 )
 
 }
+
 
 
 
@@ -344,8 +338,7 @@ function SettingRow({title,desc,children}){
 
 return(
 
-<div
-className="
+<div className="
 flex
 
 items-center
@@ -353,35 +346,33 @@ items-center
 justify-between
 
 gap-3
-"
->
+">
 
 
 <div>
 
 
-<div
-className="
+<div className="
 text-sm
 
 font-medium
 
 text-gray-200
-"
->
+">
 
 {title}
 
 </div>
 
 
-<div
-className="
-text-[11px]
 
-text-gray-500
-"
->
+<div className="
+text-xs
+
+text-gray-400
+
+leading-relaxed
+">
 
 {desc}
 
@@ -394,9 +385,7 @@ text-gray-500
 {children}
 
 
-
 </div>
-
 
 )
 
@@ -436,11 +425,13 @@ items-center
 
 rounded-full
 
+
 transition-all
 
 duration-300
 
 ease-out
+
 
 focus:outline-none
 
@@ -455,7 +446,7 @@ enabled
 
 ?
 
-"bg-gradient-to-r from-green-400 to-emerald-500 shadow-[0_0_18px_rgba(16,185,129,0.95)]"
+"bg-gradient-to-r from-green-400 to-emerald-500 glow-toggle"
 
 :
 
@@ -484,7 +475,6 @@ rounded-full
 
 bg-white
 
-shadow-[0_0_12px_rgba(255,255,255,0.9)]
 
 transition-transform
 
@@ -499,11 +489,11 @@ enabled
 
 ?
 
-"translate-x-5"
+"translate-x-5 shadow-[0_0_8px_rgba(255,255,255,0.9)]"
 
 :
 
-"translate-x-0"
+"translate-x-0 shadow-md"
 
 }
 
@@ -512,9 +502,7 @@ enabled
 />
 
 
-
 </button>
-
 
 )
 

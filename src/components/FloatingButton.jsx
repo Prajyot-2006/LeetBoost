@@ -29,7 +29,10 @@ cursor-pointer
 "
 >
 
-⚡
+<img
+src={chrome.runtime.getURL("icon128.png")}
+className="w-full h-full object-cover"
+/>
 
 </button>
 

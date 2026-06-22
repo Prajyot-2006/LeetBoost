@@ -1,28 +1,27 @@
-import {showCelebration} from "./celebration";
+import { showCelebration } from "./celebration";
 
 
-let stats={
+let stats = {
 
-startTime:Date.now(),
+  startTime: Date.now(),
 
-pasteEvents:0,
+  pasteEvents: 0,
 
-tabSwitches:0,
+  tabSwitches: 0,
 
-bulkPaste:false,
+  bulkPaste: false,
 
-submitted:false,
+  submitted: false,
 
-attempts:0,
+  attempts: 0,
 
-status:null
+  status: null
 
 };
 
 
 
-let waitingResult=false;
-
+let waitingResult = false;
 
 
 
@@ -32,51 +31,53 @@ export function startTracking(){
 
 
 
-window.addEventListener(
-"paste",
-(e)=>{
+  // Paste Detection
 
+  window.addEventListener(
+    "paste",
+    (e)=>{
 
-stats.pasteEvents++;
 
+      stats.pasteEvents++;
 
-let text=e.clipboardData?
-e.clipboardData.getData("text")
-:"";
 
+      let text = e.clipboardData
+        ? e.clipboardData.getData("text")
+        : "";
 
-if(text.length>300){
 
-stats.bulkPaste=true;
+      if(text.length > 300){
 
-}
+        stats.bulkPaste = true;
 
+      }
 
-},
-true
-);
 
+    },
+    true
+  );
 
 
 
 
 
 
+  // Tab Switch Detection
 
-document.addEventListener(
-"visibilitychange",
-()=>{
+  document.addEventListener(
+    "visibilitychange",
+    ()=>{
 
 
-if(document.hidden){
+      if(document.hidden){
 
-stats.tabSwitches++;
+        stats.tabSwitches++;
 
-}
+      }
 
 
-}
-);
+    }
+  );
 
 
 
@@ -85,145 +86,166 @@ stats.tabSwitches++;
 
 
 
+  // Submit Detection
 
+  document.addEventListener(
+    "click",
+    (e)=>{
 
-document.addEventListener(
-"click",
-(e)=>{
 
+      let btn = e.target.closest("button");
 
-let btn=e.target.closest("button");
 
+      if(!btn) return;
 
-if(!btn)return;
 
 
+      if(btn.innerText.includes("Submit")){
 
-if(btn.innerText.includes("Submit")){
 
+        stats.submitted = true;
 
-stats.submitted=true;
 
+        stats.status = null;
 
-waitingResult=true;
 
 
-}
+        // same logic as old project
+        // wait for LeetCode result update
 
+        setTimeout(()=>{
 
-}
-);
 
+          waitingResult = true;
 
 
+        },1000);
 
 
+      }
 
 
+    }
+  );
 
 
 
 
-const observer=new MutationObserver(()=>{
 
 
-if(!waitingResult)
-return;
 
 
 
-let page=document.body.innerText;
 
+  // Result Detection (old working logic)
 
+  const observer = new MutationObserver(()=>{
 
 
+    if(!waitingResult)
 
-if(page.includes("Accepted")){
+      return;
 
 
-stats.status="passed";
 
 
 
-saveReport((count)=>{
+    let page = document.body.innerText;
 
 
-showCelebration(
-"passed",
-count
-);
 
 
-});
 
+    if(page.includes("Accepted")){
 
 
-waitingResult=false;
+      stats.status = "passed";
 
 
-}
 
+      saveReport((count)=>{
 
 
+        showCelebration(
+          "passed",
+          count
+        );
 
 
+      });
 
 
-else if(
 
-page.includes("Wrong Answer") ||
+      waitingResult = false;
 
-page.includes("Runtime Error") ||
 
-page.includes("Compile Error") ||
+    }
 
-page.includes("Time Limit Exceeded")
 
-){
 
 
 
-stats.status="failed";
 
 
+    else if(
 
-saveReport((count)=>{
+      page.includes("Wrong Answer") ||
 
+      page.includes("Runtime Error") ||
 
-showCelebration(
-"failed",
-count
-);
+      page.includes("Compile Error") ||
 
+      page.includes("Time Limit Exceeded")
 
-});
+    ){
 
 
 
-waitingResult=false;
+      stats.status = "failed";
 
 
-}
 
+      saveReport((count)=>{
 
 
-});
+        showCelebration(
+          "failed",
+          count
+        );
 
 
+      });
 
 
 
 
+      waitingResult = false;
 
 
-observer.observe(
-document.body,
-{
-childList:true,
-subtree:true,
-characterData:true
-}
-);
+    }
+
+
+
+
+  });
+
+
+
+
+
+
+  observer.observe(
+    document.body,
+    {
+
+      childList:true,
+
+      subtree:true,
+
+      characterData:true
+
+    }
+  );
 
 
 
@@ -245,13 +267,96 @@ export function getStats(){
 
 
 
-if(!stats.submitted){
+  if(!stats.submitted){
 
-return{
 
-submitted:false
+    return {
 
-};
+      submitted:false
+
+    };
+
+
+  }
+
+
+
+
+
+
+
+  let time = Math.floor(
+
+    (Date.now() - stats.startTime) / 1000
+
+  );
+
+
+
+
+
+
+  let verdict = "🟢 Natural Coding Pattern";
+
+
+
+
+
+  if(stats.bulkPaste){
+
+
+    verdict = "🔴 Bulk Paste Detected";
+
+
+  }
+
+
+
+
+
+  else if(stats.pasteEvents > 3){
+
+
+    verdict = "🟡 Multiple Paste Events";
+
+
+  }
+
+
+
+
+
+
+
+
+
+  return {
+
+
+    submitted:true,
+
+
+    attempts:stats.attempts,
+
+
+    status:stats.status,
+
+
+    time,
+
+
+    pasteEvents:stats.pasteEvents,
+
+
+    tabSwitches:stats.tabSwitches,
+
+
+    verdict
+
+
+  };
+
+
 
 }
 
@@ -259,69 +364,6 @@ submitted:false
 
 
 
-let time=Math.floor(
-
-(Date.now()-stats.startTime)/1000
-
-);
-
-
-
-
-
-
-let verdict="🟢 Natural Coding Pattern";
-
-
-
-
-if(stats.bulkPaste){
-
-verdict="🔴 Bulk Paste Detected";
-
-}
-
-
-else if(stats.pasteEvents>3){
-
-verdict="🟡 Multiple Paste Events";
-
-}
-
-
-
-
-
-
-return{
-
-
-submitted:true,
-
-
-attempts:stats.attempts,
-
-
-status:stats.status,
-
-
-time,
-
-
-pasteEvents:stats.pasteEvents,
-
-
-tabSwitches:stats.tabSwitches,
-
-
-verdict
-
-
-};
-
-
-
-}
 
 
 
@@ -329,123 +371,198 @@ verdict
 
 
 
-
-
-
-
-
+// Save Report
 
 export function saveReport(callback){
 
 
 
-let problem=
+  let problem =
 
-window.location.pathname.split("/")[2];
+  window.location.pathname.split("/")[2];
 
 
 
 
 
-chrome.storage.local.get(
-{
-reports:{}
-},
-(data)=>{
 
 
 
-let reports=data.reports;
+  chrome.storage.local.get(
+    {
 
+      reports:{}
 
+    },
+    (data)=>{
 
-let old=reports[problem];
 
 
 
 
-// attempts cumulative
 
-let oldAttempts=
+      let reports = data.reports;
 
-old?
 
-old.attempts:
 
-0;
+      let old = reports[problem];
 
 
 
-stats.attempts=
 
-oldAttempts+1;
 
 
 
 
 
+      // Attempts lifetime
 
-let report=getStats();
 
+      let oldAttempts =
 
+      old ?
 
+      old.attempts :
 
+      0;
 
 
 
-// time cumulative
 
-let oldTime=
 
-old?
+      stats.attempts =
 
-old.time:
+      oldAttempts + 1;
 
-0;
 
 
 
 
-report.time=
 
-oldTime + report.time;
 
 
+      let report = getStats();
 
 
 
 
 
 
-reports[problem]=report;
 
 
 
 
+      // Time lifetime cumulative
 
 
+      let oldTime =
 
-chrome.storage.local.set(
-{
-reports
-},
-()=>{
+      old ?
 
+      old.time :
 
-callback(stats.attempts);
+      0;
 
 
-}
 
 
-);
 
+      report.time =
 
+      oldTime + report.time;
 
-}
 
 
-);
+
+
+
+
+
+
+
+      // Current session only
+
+
+      report.tabSwitches =
+
+      stats.tabSwitches;
+
+
+
+
+
+      report.pasteEvents =
+
+      stats.pasteEvents;
+
+
+
+
+
+
+
+
+
+
+      reports[problem] = report;
+
+
+
+
+
+
+
+
+
+      chrome.storage.local.set(
+        {
+
+          reports
+
+        },
+        ()=>{
+
+
+
+
+
+
+
+
+          // Reset after submission
+
+
+          stats.startTime = Date.now();
+
+
+          stats.tabSwitches = 0;
+
+
+          stats.pasteEvents = 0;
+
+
+          stats.bulkPaste = false;
+
+
+          stats.submitted = false;
+
+
+
+
+
+
+
+
+          callback(stats.attempts);
+
+
+        }
+      );
+
+
+
+    }
+  );
 
 
 
