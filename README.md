@@ -1,16 +1,102 @@
-# React + Vite
+# 🚀 LeetBoost
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A fun Chrome Extension that upgrades your LeetCode experience with **GTA & Minecraft inspired animations**, sound effects, and coding analytics.
 
-Currently, two official plugins are available:
+Turn every submission into a mission 🎮
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 🟢 Mission Passed animation for Accepted solutions
+- 🔴 Mission Failed animation for wrong submissions
+- 🔊 GTA & Minecraft themed sound effects
+- 🎨 Switch between different themes
+- 📊 Generate coding reports
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 📊 Submission Report
+
+Track your problem solving activity:
+
+```
+🔥 Attempts : 3
+
+🟢 Mission Passed
+
+⏱ Time : 380s
+
+📋 Paste Events : 1
+
+👀 Tab Switches : 0
+
+🟢 Natural Coding Pattern
+```
+
+---
+
+## 🧠 Smart Detection
+
+LeetBoost tracks:
+
+- Total attempts per problem
+- Total time spent solving
+- Paste activity
+- Tab switches
+- Coding behavior patterns
+
+---
+
+## 🛠️ Tech Stack
+
+- React.js
+- Vite
+- Tailwind CSS
+- JavaScript
+- Chrome Extension Manifest V3
+- Chrome Storage API
+
+---
+
+## ⚙️ Installation
+
+Clone repository:
+
+```bash
+git clone https://github.com/Prajyot-2006/LeetBoost.git
+```
+
+Install packages:
+
+```bash
+npm install
+```
+
+Build extension:
+
+```bash
+npm run build
+```
+
+Load in Chrome:
+
+```
+Extensions
+→ Developer Mode ON
+→ Load Unpacked
+→ Select dist folder
+```
+
+---
+
+## 🚀 Future Updates
+
+- More themes
+- Progress dashboard
+- Streak tracking
+- AI insights
+
+---
+
+Made with ❤️ for LeetCode grinders.
