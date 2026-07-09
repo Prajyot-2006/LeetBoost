@@ -1,73 +1,58 @@
-import {getSettings} from "./settings";
+import { getSettings } from "./settings";
 
-export function showCelebration(type,count){
+export function showCelebration(type, count) {
 
+  getSettings((settings) => {
 
-getSettings((settings)=>{
+    if (!settings.celebration)
+      return;
 
+    let overlay = document.createElement("div");
 
-if(!settings.celebration)
-return;
+    overlay.className = "leetboost-celebration";
 
+    let img = document.createElement("img");
 
-let overlay=document.createElement("div");
+    try {
 
-overlay.className="leetboost-celebration";
+      img.src =
+        chrome.runtime.getURL(
+          `assets/${settings.theme}/${type}.png`
+        );
 
+    }
+    catch (e) {
 
+      return;
 
-let img=document.createElement("img");
+    }
 
+    img.className = "leetboost-img";
 
-try{
-
-img.src=
-chrome.runtime.getURL(
-`assets/${settings.theme}/${type}.png`
-);
-
-}
-catch(e){
-
-return;
-
-}
-
-
-img.className="leetboost-img";
-
-overlay.appendChild(img);
+    overlay.appendChild(img);
 
 
 
 
 
+    let text = document.createElement("h1");
 
-let text=document.createElement("h1");
+    text.innerText =
+      type === "passed"
+        ? `Cleared in ${count} attempts 🔥`
+        : `Attempt #${count}`;
 
+    text.className = "leetboost-title";
 
-text.innerText=
-type==="passed"
-?
-`Cleared in ${count} attempts 🔥`
-:
-`Attempt #${count}`;
-
-
-text.className="leetboost-title";
-
-
-overlay.appendChild(text);
+    overlay.appendChild(text);
 
 
 
 
 
+    let style = document.createElement("style");
 
-let style=document.createElement("style");
-
-
-style.innerHTML=`
+    style.innerHTML = `
 
 .leetboost-celebration{
 
@@ -75,8 +60,8 @@ position:fixed;
 top:0;
 left:0;
 
-height:100vh;
 width:100vw;
+height:100vh;
 
 background:rgba(0,0,0,.88);
 
@@ -90,9 +75,10 @@ gap:25px;
 
 z-index:999999999;
 
-animation:lbFade .8s ease;
+animation:lbFade .4s ease;
 
 }
+
 
 
 .leetboost-img{
@@ -101,7 +87,7 @@ width:600px;
 
 max-width:90%;
 
-animation:lbZoom 1.2s ease;
+animation:lbZoom .7s ease;
 
 }
 
@@ -125,18 +111,15 @@ padding:12px 30px;
 
 border-radius:12px;
 
-
 text-shadow:
 
 4px 4px 0 black,
 
 0 0 20px #ffcc00;
 
-
-animation:lbText .8s ease;
+animation:lbText .5s ease;
 
 }
-
 
 
 
@@ -154,17 +137,15 @@ opacity:1;
 
 
 
-
 @keyframes lbZoom{
 
 from{
 
 opacity:0;
 
-transform:scale(2.5);
+transform:scale(2);
 
 }
-
 
 to{
 
@@ -178,18 +159,15 @@ transform:scale(1);
 
 
 
-
 @keyframes lbText{
-
 
 from{
 
 opacity:0;
 
-transform:translateY(40px);
+transform:translateY(30px);
 
 }
-
 
 to{
 
@@ -203,85 +181,68 @@ transform:translateY(0);
 
 `;
 
+    overlay.appendChild(style);
 
-
-overlay.appendChild(style);
-
-
-document.body.appendChild(overlay);
+    document.body.appendChild(overlay);
 
 
 
 
 
+    let audio = null;
 
+    try {
 
-let audio=null;
+      audio = new Audio(
 
+        chrome.runtime.getURL(
+          `assets/${settings.theme}/${type}.mp3`
+        )
 
-try{
+      );
 
+      audio.volume = 0.6;
 
-audio=new Audio(
+      if (settings.sound) {
 
-chrome.runtime.getURL(
-`assets/${settings.theme}/${type}.mp3`
-)
+        audio.play();
 
-);
+      }
 
-
-audio.volume=1;
-
-
-if(settings.sound){
-
-audio.play();
-
-}
-
-
-}
-catch(e){}
+    }
+    catch (e) { }
 
 
 
 
 
 
-setTimeout(()=>{
+    // Fade out after 3.5 seconds
+    setTimeout(() => {
 
+      overlay.style.opacity = "0";
+      overlay.style.transition = "opacity .5s ease";
 
-overlay.style.opacity="0";
-
-overlay.style.transition=".7s";
-
-
-},7300);
-
+    }, 4500);
 
 
 
 
 
+    // Remove after 4 seconds
+    setTimeout(() => {
 
-setTimeout(()=>{
+      overlay.remove();
 
+      if (audio) {
 
-overlay.remove();
+        audio.pause();
+        audio.currentTime = 0;
 
+      }
 
-if(audio){
+    }, 5000);
 
-audio.pause();
-
-}
-
-
-},8000);
-
-
-
-});
+  });
 
 }
