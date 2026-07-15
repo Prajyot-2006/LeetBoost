@@ -1,7 +1,7 @@
 import { getSettings } from "./settings";
 
 export function showCelebration(type, count) {
-
+console.log("showCelebration:", type);
   getSettings((settings) => {
 
     if (!settings.celebration)
@@ -19,6 +19,9 @@ export function showCelebration(type, count) {
         chrome.runtime.getURL(
           `assets/${settings.theme}/${type}.png`
         );
+        console.log("Theme:", settings.theme);
+        console.log("Image URL:", img.src);
+        console.log("Settings:", settings);
 
     }
     catch (e) {

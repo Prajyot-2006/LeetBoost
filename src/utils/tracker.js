@@ -1,4 +1,5 @@
 import { showCelebration } from "./celebration";
+import { injectInterceptor } from "./interceptor";
 
 let stats = {
   startTime: Date.now(),
@@ -10,9 +11,11 @@ let stats = {
   status: null
 };
 
-let waitingResult = false;
+let processingResult = false;
 
 export function startTracking(){
+
+  injectInterceptor();
 
   // Paste Detection
   window.addEventListener("paste", (e)=>{
@@ -34,69 +37,56 @@ export function startTracking(){
   document.addEventListener("click", (e)=>{
     let btn = e.target.closest("button");
     if(!btn) return;
-
     if(btn.innerText.includes("Submit")){
       stats.submitted = true;
       stats.status = null;
-      waitingResult = false;
-
-      setTimeout(()=>{
-        waitingResult = true;
-      }, 3000);
+      processingResult = false;
     }
   });
 
-  // Result Detection (scoped to LeetCode's result elements)
-  const observer = new MutationObserver(()=>{
-    if(!waitingResult) return;
+  // Result Detection via fetch interceptor
+  window.addEventListener("leetboost-result", (e)=>{
 
-    let resultText = "";
+    if(!stats.submitted) return;
+    if(processingResult) return;
 
-    const acceptedEl = document.querySelector('[data-e2e-locator="submission-result"]');
-    const consoleEl = document.querySelector('[data-e2e-locator="console-result"]');
-    const failedHeadingEl = document.querySelector('h3[class*="text-red"]');
+    processingResult = true;
 
-    if(acceptedEl){
-      resultText = acceptedEl.textContent.trim();
-    }
-    else if(consoleEl){
-      resultText = consoleEl.textContent.trim();
-    }
-    else if(failedHeadingEl){
-      resultText = failedHeadingEl.textContent.trim();
-    }
-    else{
-      return;
-    }
+const { status, msg } = e.detail;
 
-    if(resultText.includes("Accepted")){
-      stats.status = "passed";
-      saveReport((count)=>{
-        showCelebration("passed", count);
-      });
-      waitingResult = false;
-    }
+console.log("LeetBoost API:", status, msg);
 
-    else if(
-      resultText.includes("Wrong Answer") ||
-      resultText.includes("Runtime Error") ||
-      resultText.includes("Compile Error") ||
-      resultText.includes("Time Limit Exceeded") ||
-      resultText.includes("Memory Limit Exceeded") ||
-      resultText.includes("Output Limit Exceeded")
-    ){
-      stats.status = "failed";
-      saveReport((count)=>{
-        showCelebration("failed", count);
-      });
-      waitingResult = false;
-    }
+// Only Accepted is success.
+// Everything else is Mission Failed.
+
+if (status === 10) {
+
+  stats.status = "passed";
+
+  saveReport((count) => {
+
+    showCelebration("passed", count);
+
+    processingResult = false;
+    stats.submitted = false;
+
   });
 
-  observer.observe(document.body, {
-    childList:true,
-    subtree:true,
-    characterData:true
+} else {
+
+  stats.status = "failed";
+
+  saveReport((count) => {
+
+    showCelebration("failed", count);
+
+    processingResult = false;
+    stats.submitted = false;
+
+  });
+
+}
+
   });
 
 }
@@ -130,7 +120,6 @@ export function getStats(){
 
 }
 
-// Save Report
 export function saveReport(callback){
 
   let problem = window.location.pathname.split("/")[2];
@@ -159,7 +148,7 @@ export function saveReport(callback){
       stats.tabSwitches = 0;
       stats.pasteEvents = 0;
       stats.bulkPaste = false;
-      stats.submitted = false;
+      stats.status = null;
 
       callback(stats.attempts);
     });
