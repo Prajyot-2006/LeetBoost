@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/analyze-complexity";
+const API_URL = "https://leetboost.onrender.com/analyze-complexity";
 
 export async function analyzeComplexity(problemSlug, code) {
 
