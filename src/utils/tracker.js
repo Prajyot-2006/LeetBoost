@@ -1,5 +1,6 @@
 import { showCelebration } from "./celebration";
 import { injectInterceptor } from "./interceptor";
+import { analyzeComplexity } from "./complexity";
 
 let stats = {
   startTime: Date.now(),
@@ -52,7 +53,33 @@ export function startTracking(){
 
     processingResult = true;
 
-const { status, msg } = e.detail;
+    const {
+      status,
+      msg,
+      code,
+      problemSlug
+    } = e.detail;
+analyzeComplexity(problemSlug, code)
+  .then((complexity) => {
+
+    if (complexity) {
+
+      console.log(
+        "LeetBoost Complexity:",
+        complexity
+      );
+
+    }
+
+  })
+  .catch((error) => {
+
+    console.error(
+      "LeetBoost Complexity Error:",
+      error
+    );
+
+  });
 
 console.log("LeetBoost API:", status, msg);
 
