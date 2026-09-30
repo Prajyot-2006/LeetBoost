@@ -14,172 +14,416 @@ let stats = {
 
 let processingResult = false;
 
+// --------------------------------
+// CURRENT PROBLEM
+// --------------------------------
+
+function getProblemSlug() {
+
+  const path = window.location.pathname.split("/");
+
+  if (path[1] !== "problems") {
+    return null;
+  }
+
+  return path[2] || null;
+}
+
+let currentProblem = getProblemSlug();
+
+// This tells us whether the user submitted
+// during the current visit to this problem.
+let hasSubmittedThisVisit = false;
+
+
+// --------------------------------
+// CHECK FOR PROBLEM CHANGE
+// --------------------------------
+
+function checkProblemChange() {
+
+  const problem = getProblemSlug();
+
+  if (problem !== currentProblem) {
+
+    currentProblem = problem;
+
+    // New problem visit
+    hasSubmittedThisVisit = false;
+
+    stats = {
+      startTime: Date.now(),
+      pasteEvents: 0,
+      tabSwitches: 0,
+      bulkPaste: false,
+      submitted: false,
+      attempts: 0,
+      status: null
+    };
+
+    processingResult = false;
+  }
+
+}
+
+
+// --------------------------------
+// START TRACKING
+// --------------------------------
+
 export function startTracking(){
 
   injectInterceptor();
 
+  // --------------------------------
+  // Detect problem navigation
+  // --------------------------------
+
+  setInterval(() => {
+
+    checkProblemChange();
+
+  }, 500);
+
+
+  // --------------------------------
   // Paste Detection
+  // --------------------------------
+
   window.addEventListener("paste", (e)=>{
+
+    checkProblemChange();
+
     stats.pasteEvents++;
-    let text = e.clipboardData ? e.clipboardData.getData("text") : "";
+
+    let text =
+      e.clipboardData
+        ? e.clipboardData.getData("text")
+        : "";
+
     if(text.length > 300){
+
       stats.bulkPaste = true;
+
     }
+
   }, true);
 
+
+  // --------------------------------
   // Tab Switch Detection
-  document.addEventListener("visibilitychange", ()=>{
-    if(document.hidden){
-      stats.tabSwitches++;
-    }
-  });
+  // --------------------------------
 
+  document.addEventListener(
+    "visibilitychange",
+    ()=>{
+
+      checkProblemChange();
+
+      if(document.hidden){
+
+        stats.tabSwitches++;
+
+      }
+
+    }
+  );
+
+
+  // --------------------------------
   // Submit Detection
+  // --------------------------------
+
   document.addEventListener("click", (e)=>{
+
+    checkProblemChange();
+
     let btn = e.target.closest("button");
+
     if(!btn) return;
+
     if(btn.innerText.includes("Submit")){
+
       stats.submitted = true;
+
       stats.status = null;
+
       processingResult = false;
+
+      // IMPORTANT:
+      // This submission belongs to the
+      // current visit.
+      hasSubmittedThisVisit = true;
+
     }
+
   });
 
-  // Result Detection via fetch interceptor
-  window.addEventListener("leetboost-result", (e)=>{
 
-    if(!stats.submitted) return;
-    if(processingResult) return;
+  // --------------------------------
+  // Result Detection
+  // --------------------------------
 
-    processingResult = true;
+  window.addEventListener(
+    "leetboost-result",
+    (e)=>{
 
-    const {
-      status,
-      msg,
-      code,
-      problemSlug
-    } = e.detail;
-analyzeComplexity(problemSlug, code)
-  .then((complexity) => {
+      if(!stats.submitted) return;
 
-    if (complexity) {
+      if(processingResult) return;
+
+      processingResult = true;
+
+      const {
+        status,
+        msg,
+        code,
+        problemSlug
+      } = e.detail;
+
+
+      // --------------------------------
+      // AI COMPLEXITY
+      // --------------------------------
+
+      analyzeComplexity(
+        problemSlug,
+        code
+      )
+      .then((complexity) => {
+
+        if (complexity) {
+
+          console.log(
+            "LeetBoost Complexity:",
+            complexity
+          );
+
+        }
+
+      })
+      .catch((error) => {
+
+        console.error(
+          "LeetBoost Complexity Error:",
+          error
+        );
+
+      });
+
 
       console.log(
-        "LeetBoost Complexity:",
-        complexity
+        "LeetBoost API:",
+        status,
+        msg
       );
 
+
+      // --------------------------------
+      // ACCEPTED
+      // --------------------------------
+
+      if (status === 10) {
+
+        stats.status = "passed";
+
+        saveReport((count) => {
+
+          showCelebration(
+            "passed",
+            count
+          );
+
+          processingResult = false;
+
+          stats.submitted = false;
+
+        });
+
+      }
+
+
+      // --------------------------------
+      // FAILED
+      // --------------------------------
+
+      else {
+
+        stats.status = "failed";
+
+        saveReport((count) => {
+
+          showCelebration(
+            "failed",
+            count
+          );
+
+          processingResult = false;
+
+          stats.submitted = false;
+
+        });
+
+      }
+
     }
-
-  })
-  .catch((error) => {
-
-    console.error(
-      "LeetBoost Complexity Error:",
-      error
-    );
-
-  });
-
-console.log("LeetBoost API:", status, msg);
-
-// Only Accepted is success.
-// Everything else is Mission Failed.
-
-if (status === 10) {
-
-  stats.status = "passed";
-
-  saveReport((count) => {
-
-    showCelebration("passed", count);
-
-    processingResult = false;
-    stats.submitted = false;
-
-  });
-
-} else {
-
-  stats.status = "failed";
-
-  saveReport((count) => {
-
-    showCelebration("failed", count);
-
-    processingResult = false;
-    stats.submitted = false;
-
-  });
+  );
 
 }
 
-  });
 
-}
+// --------------------------------
+// GET STATS
+// --------------------------------
 
 export function getStats(){
 
+  checkProblemChange();
+
   if(!stats.submitted){
-    return { submitted:false };
+
+    return {
+      submitted: false,
+      hasSubmittedThisVisit
+    };
+
   }
 
-  let time = Math.floor((Date.now() - stats.startTime) / 1000);
 
-  let verdict = "🟢 Natural Coding Pattern";
+  let time =
+    Math.floor(
+      (Date.now() - stats.startTime) / 1000
+    );
+
+
+  let verdict =
+    "🟢 Natural Coding Pattern";
+
 
   if(stats.bulkPaste){
-    verdict = "🔴 Bulk Paste Detected";
-  }
-  else if(stats.pasteEvents > 3){
-    verdict = "🟡 Multiple Paste Events";
+
+    verdict =
+      "🔴 Bulk Paste Detected";
+
   }
 
+  else if(stats.pasteEvents > 3){
+
+    verdict =
+      "🟡 Multiple Paste Events";
+
+  }
+
+
   return {
-    submitted:true,
-    attempts:stats.attempts,
-    status:stats.status,
+
+    submitted: true,
+
+    attempts: stats.attempts,
+
+    status: stats.status,
+
     time,
-    pasteEvents:stats.pasteEvents,
-    tabSwitches:stats.tabSwitches,
-    verdict
+
+    pasteEvents: stats.pasteEvents,
+
+    tabSwitches: stats.tabSwitches,
+
+    verdict,
+
+    hasSubmittedThisVisit
+
   };
 
 }
 
+
+// --------------------------------
+// SAVE REPORT
+// --------------------------------
+
 export function saveReport(callback){
 
-  let problem = window.location.pathname.split("/")[2];
+  checkProblemChange();
 
-  chrome.storage.local.get({ reports:{} }, (data)=>{
+  let problem =
+    window.location.pathname.split("/")[2];
 
-    let reports = data.reports;
-    let old = reports[problem];
 
-    let oldAttempts = old ? old.attempts : 0;
-    stats.attempts = oldAttempts + 1;
+  chrome.storage.local.get(
+    { reports:{} },
+    (data)=>{
 
-    let report = getStats();
+      let reports =
+        data.reports;
 
-    let oldTime = old ? old.time : 0;
-    report.time = oldTime + report.time;
+      let old =
+        reports[problem];
 
-    report.tabSwitches = stats.tabSwitches;
-    report.pasteEvents = stats.pasteEvents;
 
-    reports[problem] = report;
+      let oldAttempts =
+        old
+          ? old.attempts
+          : 0;
 
-    chrome.storage.local.set({ reports }, ()=>{
 
-      stats.startTime = Date.now();
-      stats.tabSwitches = 0;
-      stats.pasteEvents = 0;
-      stats.bulkPaste = false;
-      stats.status = null;
+      stats.attempts =
+        oldAttempts + 1;
 
-      callback(stats.attempts);
-    });
 
-  });
+      let report =
+        getStats();
+
+
+      let oldTime =
+        old
+          ? old.time
+          : 0;
+
+
+      report.time =
+        oldTime + report.time;
+
+
+      report.tabSwitches =
+        stats.tabSwitches;
+
+
+      report.pasteEvents =
+        stats.pasteEvents;
+
+
+      reports[problem] =
+        report;
+
+
+      chrome.storage.local.set(
+        { reports },
+        ()=>{
+
+          stats.startTime =
+            Date.now();
+
+          stats.tabSwitches =
+            0;
+
+          stats.pasteEvents =
+            0;
+
+          stats.bulkPaste =
+            false;
+
+          stats.status =
+            null;
+
+          callback(
+            stats.attempts
+          );
+
+        }
+      );
+
+    }
+  );
 
 }

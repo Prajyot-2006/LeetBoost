@@ -61,100 +61,124 @@ function ReportView(){
   const [report,setReport]=useState(null);
 
 
-  function generateReport(){
+function generateReport(){
 
-    let path=window.location.pathname.split("/");
+  let path = window.location.pathname.split("/");
 
-    if(path[1]!=="problems"){
+  if(path[1] !== "problems"){
 
-      setReport({
-        type:"empty"
-      });
+    setReport({
+      type:"empty"
+    });
 
-      return;
+    return;
 
-    }
-
-
-    const problemSlug = path[2];
-
-    let data=getStats();
+  }
 
 
-    // ==========================================
-    // NO ACTIVE SUBMISSION
-    // ==========================================
+  const problemSlug = path[2];
 
-    if(!data.submitted){
-
-      chrome.storage.local.get(
-
-        {
-          reports:{}
-        },
-
-        (saved)=>{
-
-          let old=saved.reports[problemSlug];
+  let data = getStats();
 
 
-          if(old){
+  // ==========================================
+  // NO ACTIVE SUBMISSION
+  // ==========================================
 
-            loadComplexity(
-              problemSlug,
-              (complexity)=>{
+  if(!data.submitted){
 
-                setReport({
-                  type:"report",
-                  ...old,
-                  complexity
-                });
+    chrome.storage.local.get(
+      {
+        reports:{}
+      },
 
-              }
-            );
+      (saved)=>{
 
-          }
+        let old =
+          saved.reports[problemSlug];
 
-          else{
 
-            setReport({
-              type:"nosubmit"
-            });
+        // ==========================================
+        // PREVIOUSLY SOLVED
+        // ==========================================
 
-          }
+        if(old){
+
+          loadComplexity(
+            problemSlug,
+
+            (complexity)=>{
+
+              setReport({
+
+                type:"report",
+
+                ...old,
+
+                // Only show this when the user
+                // did NOT submit during this visit.
+                previouslySolved:
+                  !data.hasSubmittedThisVisit,
+
+                complexity
+
+              });
+
+            }
+
+          );
 
         }
 
-      );
+
+        // ==========================================
+        // NEVER SUBMITTED
+        // ==========================================
+
+        else{
+
+          setReport({
+            type:"nosubmit"
+          });
+
+        }
+
+      }
+
+    );
+
+    return;
+
+  }
 
 
-      return;
+  // ==========================================
+  // CURRENT SUBMISSION
+  // ==========================================
+
+  loadComplexity(
+    problemSlug,
+
+    (complexity)=>{
+
+      setReport({
+
+        type:"report",
+
+        ...data,
+
+        // Current submission = NOT previously solved
+        previouslySolved:false,
+
+        complexity
+
+      });
 
     }
 
+  );
 
-    // ==========================================
-    // CURRENT SUBMISSION
-    // ==========================================
-
-    loadComplexity(
-      problemSlug,
-      (complexity)=>{
-
-        setReport({
-
-          type:"report",
-
-          ...data,
-
-          complexity
-
-        });
-
-      }
-    );
-
-  }
+}
 
 
   // ==========================================
@@ -373,6 +397,37 @@ function ReportView(){
       </h3>
 
 
+      {/* PREVIOUSLY SOLVED */}
+
+      {report.previouslySolved && (
+
+        <div className="
+        rounded-lg
+        border
+        border-blue-500/30
+        bg-blue-500/10
+        p-3
+        text-sm
+        ">
+
+          <p className="text-blue-400 font-semibold">
+
+            🕘 Previously Solved
+
+          </p>
+
+          <p className="text-gray-400 mt-1">
+
+            You have previously solved this problem.
+            This is your saved report.
+
+          </p>
+
+        </div>
+
+      )}
+
+
       <div className="
       relative
       overflow-hidden
@@ -400,11 +455,17 @@ function ReportView(){
         <p>
 
         {
+
           report.status==="passed"
+
           ?
+
           "🟢 Mission Passed"
+
           :
+
           "🔴 Mission Failed"
+
         }
 
         </p>
@@ -454,65 +515,70 @@ function ReportView(){
           </p>
 
 
-{/* AI COMPLEXITY */}
+          {/* AI COMPLEXITY */}
 
-{report.complexity && (
+          {report.complexity && (
 
-  <div className="
-  border-t
-  border-gray-700
-  pt-3
-  space-y-2
-  ">
-
-    {/* AI ERROR */}
-
-    {report.complexity.error ? (
-
-      <p className="text-yellow-400">
-
-        ⚠️ {report.complexity.message}
-
-      </p>
-
-    ) : (
-
-      <>
-
-        {/* TIME COMPLEXITY */}
-
-        <p className="text-gray-300">
-
-          🤖 Time Complexity :
-          <span className="text-green-400 ml-1">
-
-            {report.complexity.timeComplexity}
-
-          </span>
-
-        </p>
+            <div className="
+            border-t
+            border-gray-700
+            pt-3
+            space-y-2
+            ">
 
 
-        {/* SPACE COMPLEXITY */}
+              {/* AI ERROR */}
 
-        <p className="text-gray-300">
+              {report.complexity.error ? (
 
-          💾 Space Complexity :
-          <span className="text-green-400 ml-1">
+                <p className="text-yellow-400">
 
-            {report.complexity.spaceComplexity}
+                  ⚠️ {report.complexity.message}
 
-          </span>
+                </p>
 
-        </p>
+              ) : (
 
-      </>
+                <>
 
-    )}
 
-  </div>
+                  {/* TIME COMPLEXITY */}
 
-)}
+                  <p className="text-gray-300">
+
+                    🤖 Time Complexity :
+
+                    <span className="text-green-400 ml-1">
+
+                      {report.complexity.timeComplexity}
+
+                    </span>
+
+                  </p>
+
+
+                  {/* SPACE COMPLEXITY */}
+
+                  <p className="text-gray-300">
+
+                    💾 Space Complexity :
+
+                    <span className="text-green-400 ml-1">
+
+                      {report.complexity.spaceComplexity}
+
+                    </span>
+
+                  </p>
+
+
+                </>
+
+              )}
+
+            </div>
+
+          )}
 
 
         </div>
